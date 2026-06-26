@@ -1,4 +1,0 @@
-allowBuilds:
-  '@apollo/protobufjs': true
-  esbuild: true
-  sharp: set this to true or false
