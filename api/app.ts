@@ -1,5 +1,6 @@
 import { ApolloServer } from '@apollo/server';
 import { expressMiddleware } from '@as-integrations/express5';
+import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import express from 'express';
 import cors from 'cors';
 
@@ -15,7 +16,12 @@ const resolvers = {
   },
 };
 
-const server = new ApolloServer({ typeDefs, resolvers });
+const server = new ApolloServer({
+  typeDefs,
+  resolvers,
+  introspection: true, //cuando se termine poner en false
+  plugins: [ApolloServerPluginLandingPageLocalDefault({ embed: true })], //cuando se termine quitar el plugin
+});
 await server.start();
 
 const app = express();
