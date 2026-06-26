@@ -1,5 +1,7 @@
 import { ApolloServer } from '@apollo/server';
 import { startStandaloneServer } from '@apollo/server/standalone';
+import pool from './db.js';
+
 
 const typeDefs = `#graphql
   type Query {
