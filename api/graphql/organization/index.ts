@@ -1,5 +1,6 @@
 import { builder } from '../builder.js'
 import prisma from '../../prisma.js'
+import { StringFilter } from '../shared/filters.js'
 
 builder.prismaObject('Organization', {
   fields: t => ({
@@ -7,10 +8,6 @@ builder.prismaObject('Organization', {
     name: t.exposeString('name'),
     createdAt: t.expose('createdAt', { type: 'DateTime' })
   })
-})
-
-const StringFilter = builder.prismaFilter('String', {
-  ops: ['equals', 'contains', 'startsWith', 'endsWith', 'not']
 })
 
 const OrganizationWhere = builder.prismaWhere('Organization', {
