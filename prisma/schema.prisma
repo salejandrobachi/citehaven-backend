@@ -3,6 +3,13 @@ generator client {
   output   = "../generated/prisma"
 }
 
+generator pothos {
+  provider     = "prisma-pothos-types"
+  clientOutput = "../generated/prisma/client.js"
+  output       = "../generated/pothos-types.ts"
+  prismaUtils  = true
+}
+
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
