@@ -6,7 +6,8 @@ builder.prismaObject('Organization', {
   fields: t => ({
     id: t.exposeID('id'),
     name: t.exposeString('name'),
-    createdAt: t.expose('createdAt', { type: 'DateTime' })
+    createdAt: t.expose('createdAt', { type: 'DateTime' }),
+    users: t.relation('users')
   })
 })
 

@@ -6,7 +6,8 @@ builder.prismaObject('Vault', {
   fields: (t) => ({
     id: t.exposeID('id'),
     title: t.exposeString('title'),
-    createdAt: t.expose('createdAt', { type: 'DateTime' })
+    createdAt: t.expose('createdAt', { type: 'DateTime' }),
+    ownerUser: t.relation('ownerUser', { nullable: true })
   })
 })
 

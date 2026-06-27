@@ -7,7 +7,9 @@ builder.prismaObject('User', {
     id: t.exposeID('id'),
     email: t.exposeString('email'),
     name: t.exposeString('name', { nullable: true }),
-    createdAt: t.expose('createdAt', { type: 'DateTime' })
+    createdAt: t.expose('createdAt', { type: 'DateTime' }),
+    organization: t.relation('organization', { nullable: true }),
+    vaults: t.relation('vaults')
   })
 })
 
