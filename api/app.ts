@@ -3,16 +3,46 @@ import { expressMiddleware } from '@as-integrations/express5';
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default';
 import express from 'express';
 import cors from 'cors';
+import { DateTimeResolver } from 'graphql-scalars';
+import prisma from './prisma.js';
 
 const typeDefs = `#graphql
+  scalar DateTime
+
+  type Organization {
+    id: ID!
+    name: String!
+    createdAt: DateTime!
+  }
+
+  type Vault {
+    id: ID!
+    title: String!
+    createdAt: DateTime!
+  }
+
   type Query {
-    hello: String
+    organizations: [Organization!]!
+    vaults: [Vault!]!
+  }
+
+  type Mutation {
+    createOrganization(name: String!): Organization!
+    createVault(title: String!): Vault!
   }
 `;
 
 const resolvers = {
+  DateTime: DateTimeResolver,
   Query: {
-    hello: () => 'Citehaven backend funcionando 🎉',
+    organizations: () => prisma.organization.findMany(),
+    vaults: () => prisma.vault.findMany(),
+  },
+  Mutation: {
+    createOrganization: (_: unknown, args: { name: string }) =>
+      prisma.organization.create({ data: { name: args.name } }),
+    createVault: (_: unknown, args: { title: string }) =>
+      prisma.vault.create({ data: { title: args.title } }),
   },
 };
 

@@ -1,0 +1,78 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Organization {
+  id        String   @id @default(uuid())
+  name      String
+  users     User[]
+  createdAt DateTime @default(now()) @map("created_at")
+
+  @@map("organizations")
+}
+
+model User {
+  id             String        @id @default(uuid())
+  email          String        @unique
+  name           String?
+  organizationId String?       @map("organization_id")
+  organization   Organization? @relation(fields: [organizationId], references: [id])
+  vaults         Vault[]
+  createdAt      DateTime      @default(now()) @map("created_at")
+
+  @@map("users")
+}
+
+model Vault {
+  id                 String    @id @default(uuid())
+  title              String
+  ownerUserId        String?   @map("owner_user_id")
+  ownerUser          User?     @relation(fields: [ownerUserId], references: [id])
+  anonymousSessionId String?   @map("anonymous_session_id")
+  documents          Document[]
+  chatMessages       ChatMessage[]
+  createdAt          DateTime  @default(now()) @map("created_at")
+
+  @@map("vaults")
+}
+
+model Document {
+  id          String          @id @default(uuid())
+  vaultId  String          @map("vault_id")
+  vault    Vault        @relation(fields: [vaultId], references: [id])
+  filename    String
+  fileType    String          @map("file_type")
+  storageUrl  String          @map("storage_url")
+  status      String          @default("uploaded")
+  chunks      DocumentChunk[]
+  createdAt   DateTime        @default(now()) @map("created_at")
+
+  @@map("documents")
+}
+
+model DocumentChunk {
+  id         String   @id @default(uuid())
+  documentId String   @map("document_id")
+  document   Document @relation(fields: [documentId], references: [id])
+  content    String
+  chunkIndex Int      @map("chunk_index")
+
+  @@map("document_chunks")
+}
+
+model ChatMessage {
+  id         String   @id @default(uuid())
+  vaultId String   @map("vault_id")
+  vault   Vault @relation(fields: [vaultId], references: [id])
+  role       String
+  content    String
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("chat_messages")
+}

@@ -11,7 +11,10 @@
   "pnpm": {
     "onlyBuiltDependencies": [
       "@apollo/protobufjs",
-      "esbuild"
+      "esbuild",
+      "@prisma/engines",
+      "prisma",
+      "@prisma/client"
     ]
   },
   "keywords": [],
@@ -22,9 +25,11 @@
   "dependencies": {
     "@apollo/server": "^5.5.1",
     "@as-integrations/express5": "^1.1.2",
+    "@prisma/client": "6",
     "cors": "^2.8.6",
     "express": "^5.2.1",
     "graphql": "^16.14.2",
+    "graphql-scalars": "^1.25.0",
     "pg": "^8.22.0"
   },
   "devDependencies": {
@@ -32,6 +37,8 @@
     "@types/express": "^5.0.6",
     "@types/node": "^26.0.1",
     "@types/pg": "^8.20.0",
+    "dotenv": "^17.4.2",
+    "prisma": "6",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3"
   }
