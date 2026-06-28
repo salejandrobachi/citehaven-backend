@@ -9,6 +9,7 @@ import './graphql/organization/index.js'
 import './graphql/vault/index.js'
 import './graphql/user/index.js'
 import './graphql/document/index.js'
+import './graphql/document-chunk/index.js'
 
 const schema = builder.toSchema()
 

@@ -69,6 +69,7 @@ model DocumentChunk {
   document   Document @relation(fields: [documentId], references: [id])
   content    String
   chunkIndex Int      @map("chunk_index")
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@map("document_chunks")
 }
