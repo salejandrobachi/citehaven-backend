@@ -4,7 +4,7 @@ import PrismaUtils from '@pothos/plugin-prisma-utils'
 import { DateTimeResolver } from 'graphql-scalars'
 import type PrismaTypes from '../../generated/pothos-types.js'
 import { getDatamodel } from '../../generated/pothos-types.js'
-import prisma from '../prisma.js'
+import prisma from '../../api/prisma.js'
 
 export const builder = new SchemaBuilder<{
   PrismaTypes: PrismaTypes

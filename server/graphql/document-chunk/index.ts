@@ -1,5 +1,5 @@
 import { builder } from '../builder.js'
-import prisma from '../../prisma.js'
+import prisma from '../../../api/prisma.js'
 import { chunkText } from '../../lib/chunking.js'
 
 const CHUNK_SIZE = 800

@@ -4,14 +4,14 @@ import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin
 import express from 'express'
 import cors from 'cors'
 
-import { builder } from './graphql/builder.js'
-import './graphql/organization/index.js'
-import './graphql/vault/index.js'
-import './graphql/user/index.js'
-import './graphql/document/index.js'
-import './graphql/document-chunk/index.js'
+import { builder } from '../server/graphql/builder.js'
+import '../server/graphql/organization/index.js'
+import '../server/graphql/vault/index.js'
+import '../server/graphql/user/index.js'
+import '../server/graphql/document/index.js'
+import '../server/graphql/document-chunk/index.js'
 
-import uploadRouter from './upload.js'
+import uploadRouter from '../server/upload.js'
 
 const schema = builder.toSchema()
 
