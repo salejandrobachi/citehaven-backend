@@ -1,7 +1,9 @@
 {
   "version": 2,
   "functions": {
-    "api/app.ts": {}
+    "api/app.ts": {
+      "maxDuration": 30
+    }
   },
   "rewrites": [
     { "source": "/(.*)", "destination": "/api/app" }
