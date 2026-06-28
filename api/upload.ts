@@ -1,4 +1,4 @@
-import { Router } from 'express'
+import { Router, Request, Response } from 'express'
 import multer from 'multer'
 import { put } from '@vercel/blob'
 
@@ -6,7 +6,7 @@ const upload = multer({ storage: multer.memoryStorage() })
 
 const router = Router()
 
-router.post('/', upload.single('file'), async (req, res) => {
+router.post('/', upload.single('file'), async (req: Request, res: Response) => {
   if (!req.file) {
     res.status(400).json({ error: 'No se recibió ningún archivo' })
     return
