@@ -11,6 +11,8 @@ import './graphql/user/index.js'
 import './graphql/document/index.js'
 import './graphql/document-chunk/index.js'
 
+import uploadRouter from './upload.js'
+
 const schema = builder.toSchema()
 
 const server = new ApolloServer({
@@ -22,6 +24,8 @@ await server.start()
 
 const app = express()
 
-app.use('/', cors(), express.json(), expressMiddleware(server))
+app.use(cors())
+app.use('/upload', uploadRouter)
+app.use('/', express.json(), expressMiddleware(server))
 
 export default app
