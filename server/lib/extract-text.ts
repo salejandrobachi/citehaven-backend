@@ -1,5 +1,6 @@
-import { get } from '@vercel/blob'
+import { CanvasFactory } from 'pdf-parse/worker'
 import { PDFParse } from 'pdf-parse'
+import { get } from '@vercel/blob'
 
 export async function extractTextFromBlob(storageUrl: string, fileType: string): Promise<string> {
   const result = await get(storageUrl, {
@@ -23,7 +24,7 @@ export async function extractTextFromBlob(storageUrl: string, fileType: string):
   const buffer = Buffer.concat(chunks.map((chunk) => Buffer.from(chunk)))
 
   if (fileType === 'application/pdf') {
-    const parser = new PDFParse({ data: buffer })
+    const parser = new PDFParse({ data: buffer, CanvasFactory })
     const pdfResult = await parser.getText()
     await parser.destroy()
     return pdfResult.text
