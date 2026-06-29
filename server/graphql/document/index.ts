@@ -1,6 +1,11 @@
 import { builder } from '../builder.js'
 import prisma from '../../../api/prisma.js'
 import { StringFilter } from '../shared/filters.js'
+import { extractTextFromBlob } from '../../lib/extract-text.js'
+import { chunkText } from '../../lib/chunking.js'
+
+const CHUNK_SIZE = 800
+const CHUNK_OVERLAP = 120
 
 builder.prismaObject('Document', {
   fields: (t) => ({
@@ -108,5 +113,56 @@ builder.mutationFields((t) => ({
         ...query,
         where: { id: String(args.id) }
       })
+  }),
+  processDocument: t.prismaField({
+    type: 'Document',
+    args: {
+      id: t.arg.id({ required: true })
+    },
+    resolve: async (query, _root, args) => {
+      const documentId = String(args.id)
+
+      const document = await prisma.document.findUnique({
+        where: { id: documentId }
+      })
+
+      if (!document) {
+        throw new Error('Document no encontrado')
+      }
+
+      try {
+        const text = await extractTextFromBlob(document.storageUrl, document.fileType)
+
+        const chunks = chunkText(text, {
+          chunkSize: CHUNK_SIZE,
+          overlap: CHUNK_OVERLAP
+        })
+
+        await prisma.$transaction([
+          prisma.documentChunk.deleteMany({
+            where: { documentId }
+          }),
+          prisma.documentChunk.createMany({
+            data: chunks.map((chunk) => ({
+              documentId,
+              content: chunk.content,
+              chunkIndex: chunk.chunkIndex
+            }))
+          })
+        ])
+
+        return prisma.document.update({
+          ...query,
+          where: { id: documentId },
+          data: { status: 'processed' }
+        })
+      } catch (error) {
+        await prisma.document.update({
+          where: { id: documentId },
+          data: { status: 'failed' }
+        })
+        throw error
+      }
+    }
   })
 }))

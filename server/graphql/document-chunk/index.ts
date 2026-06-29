@@ -1,9 +1,5 @@
 import { builder } from '../builder.js'
 import prisma from '../../../api/prisma.js'
-import { chunkText } from '../../lib/chunking.js'
-
-const CHUNK_SIZE = 800
-const CHUNK_OVERLAP = 120
 
 builder.prismaObject('DocumentChunk', {
   fields: (t) => ({
@@ -76,39 +72,5 @@ builder.mutationFields((t) => ({
         ...query,
         where: { id: String(args.id) }
       })
-  }),
-  chunkDocument: t.prismaField({
-    type: ['DocumentChunk'],
-    args: {
-      documentId: t.arg.id({ required: true }),
-      text: t.arg.string({ required: true })
-    },
-    resolve: async (query, _root, args) => {
-      const documentId = String(args.documentId)
-
-      const chunks = chunkText(args.text, {
-        chunkSize: CHUNK_SIZE,
-        overlap: CHUNK_OVERLAP
-      })
-
-      await prisma.$transaction([
-        prisma.documentChunk.deleteMany({
-          where: { documentId }
-        }),
-        prisma.documentChunk.createMany({
-          data: chunks.map((chunk) => ({
-            documentId,
-            content: chunk.content,
-            chunkIndex: chunk.chunkIndex
-          }))
-        })
-      ])
-
-      return prisma.documentChunk.findMany({
-        ...query,
-        where: { documentId },
-        orderBy: { chunkIndex: 'asc' }
-      })
-    }
   })
 }))
