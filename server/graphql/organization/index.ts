@@ -64,12 +64,13 @@ builder.mutationFields(t => ({
   createOrganization: t.prismaField({
     type: 'Organization',
     args: {
-      name: t.arg.string({ required: true })
+      name: t.arg.string({ required: true }),
+      code: t.arg.string({ required: true })
     },
     resolve: (query, _root, args) =>
       prisma.organization.create({
         ...query,
-        data: { name: args.name }
+        data: { name: args.name, code: args.code }
       })
   }),
   updateOrganization: t.prismaField({

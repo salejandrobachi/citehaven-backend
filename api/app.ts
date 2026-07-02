@@ -3,6 +3,8 @@ import { expressMiddleware } from '@as-integrations/express5'
 import { ApolloServerPluginLandingPageLocalDefault } from '@apollo/server/plugin/landingPage/default'
 import express from 'express'
 import cors from 'cors'
+import { verifyToken } from '../server/lib/jwt.js'
+import '../server/graphql/auth/index.js'
 
 import { builder } from '../server/graphql/builder.js'
 import '../server/graphql/organization/index.js'
@@ -26,6 +28,18 @@ const app = express()
 
 app.use(cors())
 app.use('/upload', uploadRouter)
-app.use('/', express.json(), expressMiddleware(server))
+app.use('/', express.json(), expressMiddleware(server, {
+  context: async ({ req }) => {
+    const authHeader = req.headers.authorization
+    if (!authHeader?.startsWith('Bearer ')) return { userId: null }
+    try {
+      const token = authHeader.slice(7)
+      const payload = verifyToken(token)
+      return { userId: payload.userId }
+    } catch {
+      return { userId: null }
+    }
+  }
+}))
 
 export default app

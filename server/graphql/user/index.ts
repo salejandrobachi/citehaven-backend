@@ -72,21 +72,6 @@ builder.queryFields((t) => ({
 }))
 
 builder.mutationFields((t) => ({
-  createUser: t.prismaField({
-    type: 'User',
-    args: {
-      email: t.arg.string({ required: true }),
-      name: t.arg.string({ required: false })
-    },
-    resolve: (query, _root, args) =>
-      prisma.user.create({
-        ...query,
-        data: {
-          email: args.email,
-          name: args.name
-        }
-      })
-  }),
   updateUser: t.prismaField({
     type: 'User',
     args: {

@@ -11,6 +11,9 @@ export const builder = new SchemaBuilder<{
   Scalars: {
     DateTime: { Input: Date; Output: Date }
   }
+  Context: {
+    userId: string | null
+  }
 }>({
   plugins: [PrismaPlugin, PrismaUtils],
   prisma: {

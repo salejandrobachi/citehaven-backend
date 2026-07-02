@@ -20,6 +20,7 @@ model Organization {
   name      String
   users     User[]
   createdAt DateTime @default(now()) @map("created_at")
+  code      String   @unique
 
   @@map("organizations")
 }
@@ -32,6 +33,7 @@ model User {
   organization   Organization? @relation(fields: [organizationId], references: [id])
   vaults         Vault[]
   createdAt      DateTime      @default(now()) @map("created_at")
+  passwordHash   String        @map("password_hash")
 
   @@map("users")
 }
@@ -39,9 +41,8 @@ model User {
 model Vault {
   id                 String    @id @default(uuid())
   title              String
-  ownerUserId        String?   @map("owner_user_id")
-  ownerUser          User?     @relation(fields: [ownerUserId], references: [id])
-  anonymousSessionId String?   @map("anonymous_session_id")
+  ownerUserId        String   @map("owner_user_id")
+  ownerUser          User     @relation(fields: [ownerUserId], references: [id])
   documents          Document[]
   chatMessages       ChatMessage[]
   createdAt          DateTime  @default(now()) @map("created_at")

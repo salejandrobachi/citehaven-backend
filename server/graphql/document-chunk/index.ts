@@ -2,7 +2,7 @@ import { builder } from '../builder.js'
 import prisma from '../../../api/prisma.js'
 
 builder.prismaObject('DocumentChunk', {
-  fields: (t) => ({
+  fields: t => ({
     id: t.exposeID('id'),
     content: t.exposeString('content'),
     chunkIndex: t.exposeInt('chunkIndex'),
@@ -18,17 +18,28 @@ const DocumentChunkWhere = builder.prismaWhere('DocumentChunk', {
   }
 })
 
-builder.queryFields((t) => ({
+builder.queryFields(t => ({
   documentChunks: t.prismaField({
     type: ['DocumentChunk'],
     args: {
       where: t.arg({ type: DocumentChunkWhere })
     },
-    resolve: (query, _root, args) =>
-      prisma.documentChunk.findMany({
-        ...query,
-        where: args.where ?? undefined
+    resolve: async (query, _root, args, ctx) => {
+      if (!ctx.userId) throw new Error('No autenticado.')
+      if (!args.where?.documentId) throw new Error('Se requiere documentId.')
+
+      const doc = await prisma.document.findUnique({
+        where: { id: String(args.where.documentId) },
+        include: { vault: true }
       })
+      if (!doc || doc.vault.ownerUserId !== ctx.userId)
+        throw new Error('No autorizado.')
+
+      return prisma.documentChunk.findMany({
+        ...query,
+        where: { documentId: String(args.where.documentId) }
+      })
+    }
   }),
   documentChunk: t.prismaField({
     type: 'DocumentChunk',
@@ -36,41 +47,40 @@ builder.queryFields((t) => ({
     args: {
       id: t.arg.id({ required: true })
     },
-    resolve: (query, _root, args) =>
-      prisma.documentChunk.findUnique({
+    resolve: async (query, _root, args, ctx) => {
+      if (!ctx.userId) throw new Error('No autenticado.')
+      const check = await prisma.documentChunk.findUnique({
+        where: { id: String(args.id) },
+        include: { document: { include: { vault: true } } }
+      })
+      if (check && check.document.vault.ownerUserId !== ctx.userId)
+        throw new Error('No autorizado.')
+      return prisma.documentChunk.findUnique({
         ...query,
         where: { id: String(args.id) }
       })
+    }
   })
 }))
 
-builder.mutationFields((t) => ({
-  createDocumentChunk: t.prismaField({
-    type: 'DocumentChunk',
-    args: {
-      documentId: t.arg.id({ required: true }),
-      content: t.arg.string({ required: true }),
-      chunkIndex: t.arg.int({ required: true })
-    },
-    resolve: (query, _root, args) =>
-      prisma.documentChunk.create({
-        ...query,
-        data: {
-          documentId: String(args.documentId),
-          content: args.content,
-          chunkIndex: args.chunkIndex
-        }
-      })
-  }),
+builder.mutationFields(t => ({
   deleteDocumentChunk: t.prismaField({
     type: 'DocumentChunk',
     args: {
       id: t.arg.id({ required: true })
     },
-    resolve: (query, _root, args) =>
-      prisma.documentChunk.delete({
+    resolve: async (query, _root, args, ctx) => {
+      if (!ctx.userId) throw new Error('No autenticado.')
+      const check = await prisma.documentChunk.findUnique({
+        where: { id: String(args.id) },
+        include: { document: { include: { vault: true } } }
+      })
+      if (!check || check.document.vault.ownerUserId !== ctx.userId)
+        throw new Error('No autorizado.')
+      return prisma.documentChunk.delete({
         ...query,
         where: { id: String(args.id) }
       })
+    }
   })
 }))
