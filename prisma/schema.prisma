@@ -34,6 +34,7 @@ model User {
   vaults         Vault[]
   createdAt      DateTime      @default(now()) @map("created_at")
   passwordHash   String        @map("password_hash")
+  avatarUrl      String?       @map("avatar_url")
 
   @@map("users")
 }
