@@ -6,12 +6,15 @@ import { signToken } from '../../lib/jwt.js'
 const SALT_ROUNDS = 12
 
 const AuthPayload = builder.objectType(
-  builder.objectRef<{ token: string; userId: string; email: string }>('AuthPayload'),
+  builder.objectRef<{ token: string; userId: string; email: string; avatarUrl: string | null }>(
+    'AuthPayload'
+  ),
   {
     fields: (t) => ({
       token: t.exposeString('token'),
       userId: t.exposeString('userId'),
       email: t.exposeString('email'),
+      avatarUrl: t.exposeString('avatarUrl', { nullable: true }),
     }),
   }
 )
@@ -61,7 +64,7 @@ builder.mutationFields((t) => ({
       })
 
       const token = signToken({ userId: user.id, email: user.email })
-      return { token, userId: user.id, email: user.email }
+      return { token, userId: user.id, email: user.email, avatarUrl: user.avatarUrl }
     },
   }),
 
@@ -81,7 +84,7 @@ builder.mutationFields((t) => ({
       if (!valid) throw new Error('Credenciales inválidas.')
 
       const token = signToken({ userId: user.id, email: user.email })
-      return { token, userId: user.id, email: user.email }
+      return { token, userId: user.id, email: user.email, avatarUrl: user.avatarUrl }
     },
   }),
 
