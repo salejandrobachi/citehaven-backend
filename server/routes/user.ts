@@ -39,30 +39,36 @@ router.post('/avatar', upload.single('avatar'), async (req: Request, res: Respon
     return
   }
 
-  const existingUser = await prisma.user.findUnique({
-    where: { id: userId },
-    select: { avatarUrl: true }
-  })
-
-  if (existingUser?.avatarUrl) {
-    await del(existingUser.avatarUrl, {
-      token: process.env.BLOB_READ_WRITE_TOKEN
+  try {
+    const existingUser = await prisma.user.findUnique({
+      where: { id: userId },
+      select: { avatarUrl: true }
     })
+
+    if (existingUser?.avatarUrl) {
+      await del(existingUser.avatarUrl, {
+        token: process.env.BLOB_AVATAR_READ_WRITE_TOKEN
+      })
+    }
+
+    const blob = await put(`avatars/${userId}`, req.file.buffer, {
+      access: 'public',
+      contentType: req.file.mimetype,
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      token: process.env.BLOB_AVATAR_READ_WRITE_TOKEN
+    })
+
+    await prisma.user.update({
+      where: { id: userId },
+      data: { avatarUrl: blob.url }
+    })
+
+    res.status(200).json({ avatarUrl: blob.url })
+  } catch (error) {
+    console.error('Error al subir avatar:', error)
+    res.status(500).json({ error: 'No se pudo subir la foto de perfil.' })
   }
-
-  const blob = await put(`avatars/${userId}`, req.file.buffer, {
-    access: 'public',
-    contentType: req.file.mimetype,
-    addRandomSuffix: false,
-    token: process.env.BLOB_READ_WRITE_TOKEN
-  })
-
-  await prisma.user.update({
-    where: { id: userId },
-    data: { avatarUrl: blob.url }
-  })
-
-  res.status(200).json({ avatarUrl: blob.url })
 })
 
 export default router
