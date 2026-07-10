@@ -72,6 +72,7 @@ model DocumentChunk {
   content    String
   chunkIndex Int      @map("chunk_index")
   createdAt DateTime @default(now()) @map("created_at")
+  embedding Unsupported("vector(768)")?
 
   @@map("document_chunks")
 }

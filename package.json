@@ -26,6 +26,7 @@
   "dependencies": {
     "@apollo/server": "^5.5.1",
     "@as-integrations/express5": "^1.1.2",
+    "@google/genai": "^2.11.0",
     "@graphql-tools/merge": "^9.1.9",
     "@napi-rs/canvas": "^1.0.1",
     "@pothos/core": "^4.13.0",

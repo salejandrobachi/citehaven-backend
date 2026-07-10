@@ -3,6 +3,7 @@ import prisma from '../../../api/prisma.js'
 import { StringFilter } from '../shared/filters.js'
 import { extractTextFromBlob } from '../../lib/extract-text.js'
 import { chunkText } from '../../lib/chunking.js'
+import { generateEmbedding } from '../../lib/embeddings.js'
 
 const CHUNK_SIZE = 800
 const CHUNK_OVERLAP = 120
@@ -178,16 +179,40 @@ builder.mutationFields(t => ({
           overlap: CHUNK_OVERLAP
         })
 
+        const chunksWithEmbeddings = await Promise.all(
+          chunks.map(async chunk => ({
+            documentId,
+            content: chunk.content,
+            chunkIndex: chunk.chunkIndex,
+            embedding: await generateEmbedding(chunk.content)
+          }))
+        )
+
         await prisma.$transaction([
           prisma.documentChunk.deleteMany({ where: { documentId } }),
           prisma.documentChunk.createMany({
-            data: chunks.map(chunk => ({
-              documentId,
-              content: chunk.content,
-              chunkIndex: chunk.chunkIndex
-            }))
+            data: chunksWithEmbeddings.map(({ embedding, ...rest }) => rest)
           })
         ])
+
+        // Actualizar embeddings uno por uno (createMany no soporta tipos Unsupported)
+        const createdChunks = await prisma.documentChunk.findMany({
+          where: { documentId },
+          orderBy: { chunkIndex: 'asc' }
+        })
+
+        await Promise.all(
+          createdChunks.map(
+            (chunk, i) =>
+              prisma.$executeRaw`
+      UPDATE document_chunks
+      SET embedding = ${JSON.stringify(
+        chunksWithEmbeddings[i].embedding
+      )}::vector
+      WHERE id = ${chunk.id}
+    `
+          )
+        )
 
         return prisma.document.update({
           ...query,
