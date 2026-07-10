@@ -13,6 +13,7 @@ import '../server/graphql/user/index.js'
 import '../server/graphql/document/index.js'
 import '../server/graphql/document-chunk/index.js'
 import '../server/graphql/auth/index.js'
+import '../server/graphql/chat/index.js'
 
 import uploadRouter from '../server/upload.js'
 
