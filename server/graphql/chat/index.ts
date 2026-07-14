@@ -77,7 +77,7 @@ builder.queryFields(t => ({
       const results = await semanticSearch(
         args.query,
         String(args.vaultId),
-        args.topK ?? 5
+        args.topK ?? 4
       )
 
       return chatWithDocuments(args.query, results)
