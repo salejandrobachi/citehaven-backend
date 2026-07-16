@@ -15,6 +15,33 @@ export interface ChatResponse {
   }>
 }
 
+async function generateWithRetry(
+  prompt: string,
+  maxRetries: number = 3
+): Promise<string> {
+  for (let attempt = 0; attempt <= maxRetries; attempt++) {
+    try {
+      const result = await ai.models.generateContent({
+        model: CHAT_MODEL,
+        contents: prompt
+      })
+      return result.text ?? 'No se pudo generar una respuesta.'
+    } catch (error) {
+      const isRetryable =
+        error instanceof Error &&
+        (error.message.includes('503') ||
+          error.message.includes('UNAVAILABLE') ||
+          error.message.includes('high demand'))
+
+      if (!isRetryable || attempt === maxRetries) throw error
+
+      const delay = Math.min(1000 * Math.pow(2, attempt), 8000)
+      await new Promise(resolve => setTimeout(resolve, delay))
+    }
+  }
+  throw new Error('No se pudo generar una respuesta después de varios intentos.')
+}
+
 export async function chatWithDocuments(
   query: string,
   searchResults: SearchResult[]
@@ -50,12 +77,7 @@ PREGUNTA: ${query}
 
 RESPUESTA:`
 
-  const result = await ai.models.generateContent({
-    model: CHAT_MODEL,
-    contents: prompt
-  })
-
-  const answer = result.text ?? 'No se pudo generar una respuesta.'
+  const answer = await generateWithRetry(prompt)
 
   return {
     answer,
